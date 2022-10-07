@@ -140,12 +140,14 @@ export class EthereumBase {
     tokenListType: TokenListType
   ): Promise<void> {
     this.tokenList = await this.getTokenList(tokenListSource, tokenListType);
+    // Only keep tokens in the same chain
+    this.tokenList = this.tokenList.filter(
+      (token: TokenInfo) => token.chainId === this.chainId
+    );
     if (this.tokenList) {
-      this.tokenList.forEach((token: TokenInfo) => {
-        if (token.chainId === this.chainId) {
-          this._tokenMap[token.symbol] = token;
-        }
-      });
+      this.tokenList.forEach(
+        (token: TokenInfo) => (this._tokenMap[token.symbol] = token)
+      );
     }
   }
 
@@ -331,7 +333,7 @@ export class EthereumBase {
       }
     }
     const params: any = {
-      gasLimitTransaction: this._gasLimitTransaction,
+      gasLimit: this._gasLimitTransaction,
       nonce: nonce,
     };
     if (maxFeePerGas || maxPriorityFeePerGas) {
